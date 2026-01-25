@@ -1,0 +1,46 @@
+# cloudbuild.yaml
+# Este arquivo define o pipeline do Google Cloud Build (o que rodar e em que ordem).
+
+steps:  # Lista de etapas (steps) que o Cloud Build vai executar, em sequência.
+
+  # -------------------------------
+  # 1) BUILD: constrói a imagem Docker
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/docker'  # Usa a imagem oficial do builder "docker" (para rodar comandos docker).
+    args:  # Argumentos passados para o comando "docker" dentro desse builder.
+      [
+        'build',  # docker build -> constrói uma imagem a partir do Dockerfile.
+        '-t',     # -t -> define a tag (nome) da imagem que será criada.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA', # Nome final da imagem no Container Registry; $PROJECT_ID e $SHORT_SHA são variáveis do build.
+        '.'       # Contexto do build (pasta atual). É daqui que o Docker pega o Dockerfile e o código.
+      ]
+
+  # -------------------------------
+  # 2) PUSH: envia a imagem para o registry (Container Registry / Artifact Registry)
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/docker'  # Continua usando o builder do docker.
+    args:
+      [
+        'push',   # docker push -> faz upload da imagem para o registry.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA' # Deve ser a mesma tag criada no step de build.
+      ]
+      # OBS: no push NÃO vai '.' (ponto). Push só precisa do nome/tag da imagem.
+
+  # -------------------------------
+  # 3) DEPLOY: publica a imagem no Cloud Run
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/gcloud'  # Usa o builder do gcloud (para rodar comandos do Google Cloud).
+    entrypoint: 'gcloud'                 # Define que o comando principal a ser executado é "gcloud".
+    args:
+      [
+        'run',                 # gcloud run -> comando para gerenciar Cloud Run.
+        'deploy',              # deploy -> cria/atualiza o serviço no Cloud Run.
+        'puc-fullstack',       # Nome do serviço no Cloud Run (vai aparecer assim no console).
+        '--image',             # --image -> qual imagem do container o Cloud Run vai executar.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA', # A imagem que você buildou e pushou nos steps anteriores.
+        '--region',            # --region -> região onde o serviço Cloud Run será implantado.
+        'us-central1',         # Região escolhida.
+        '--platform',          # --platform -> tipo de plataforma do Cloud Run.
+        'managed',             # managed -> Cloud Run totalmente gerenciado (o padrão).
+        '--allow-unauthenticated' # Permite acesso público sem autenticação (cuidado em produção).
+      ]

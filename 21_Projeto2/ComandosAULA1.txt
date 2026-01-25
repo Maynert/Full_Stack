@@ -1,0 +1,442 @@
+touch index.js // criar index.js
+NPM INSTALL EXPRESS // instalação do pacote express (Biblioteca) Gerenciador de dependências
+
+Dependecias devem estar no package.json
+Nele terá a lista de dependências e as versões delas.
+
+E o package-lock.json, onde será informado a versão da dependência usada, quanto a versão das Sub-bibliotecas
+
+Após, devemos sempre declarar no index para alocar no código
+
+
+Executando node index.js - inicia o fonte
+
+se acessar localhost:porta teremos o Hello Word, se adicionar /cool, teremos a carinha.
+localhost:porta/cool
+
+
+Váriaveis de ambiente geralmente são usadas resguardar senhas e acessos, assim evitando deixar no fonte.
+
+Documentos .Env são usados para definir essas variáveis.
+
+.env não deve ser enviado ao git, por questão de segurança.
+
+para usar o .env, precisa instalar a biblioteca dotenv com o seguinte comando:
+
+npm install dotenv
+
+o .env, precisa estar no gitignore
+
+Evitar instalar tudo numa máquina só, tentar usar serviço externo.
+EXemplo a digital ocean 
+
+Criei meu MySql no docker, setei a porta 3306 (padrão) e defini MYSQL_ROOT_PASSWORD = 12345
+
+Utilizei o workbench para fazer a conexão com  o Banco, que incrivelmente funcionou.
+
+Já no workbench, usei o seguinte comando:
+
+OBS: Precisa sempre setar o banco que tu ta usando na Query, no caso o Use Sys ou outro se for o nome.
+PARA QUALQUER AÇÃO.
+
+USE sys;
+
+CREATE TABLE IF NOT EXISTS user ( // irá criar a tabela se não existir, com o nome de user
+	id int primary key, // seto a chave primária como ID e defino como inteiro
+    username varchar(150) // seto a segunda coluna como nome username e digo que terá até 150 caracteres.
+);
+
+Inseri na tabela user, nas colunas ID e USERNAME os valores dentro de ()
+INSERT INTO user ( ID, USERNAME) VALUES (1, 'Maynert'), (2,'Robervaldo');
+
+Feito isso, para que o código possa comunicar com o banco 'MySql', precisa instalar uma nova biblioteca, sendo ela:
+NPM INSTALL MYSQL2
+
+Perfeição divina, agora, supondo que não tenho node na máquina e vou usar o docker para ter o node.
+
+Vamos fazer um arquivo dockerfile para manter junto e sempre ter essa encrenca junto.
+
+FROM node:alpine // nome da máquina
+
+WORKDIR /user/app // 
+
+COPY package*.json ./ // precisa fazer a cópia dos package, setando o nome package*.json ele entende que é tudo que começa com package e termina com .json.
+RUN npm install // instalação da aplicação
+
+COPY . . // copiaremos os arquivos que temos Quais?
+
+EXPOSE 3004 // porta 
+
+CMD ["npm", "start"] // inicia
+
+Feito isso, precisamos definir uma "porta" de entrada, ela será no package.json
+lá em scripts, basta adicionar a linha de comando "start": "node index.js",
+nada mais é que acessar o cmd e iniciar o index.js.
+
+interessante manter o .dockerignore com o node_modules, caso tenha o node na máquina, não duplicar
+
+Feito tudo isso, podemos levar para o docker com o seguinte comando:
+
+docker build -t myfirstapp . 
+-t é para setar o nome.
+o "." no fim, é para criar baseado nos arquivos da pasta
+
+OBS: No docker o nome "myfirstapp" precisa ser minusculo, se houver maisculo da erro!
+
+Para iniciar, precisa passar as variáveis de ambiente, sendo assim, preciso passar o seguinte comando:
+
+docker run --env-file=.env -p 3004 -d myfirstapp
+
+No meu caso, deu erro pois estou usando o MySql em container já, precisarei fazer uma curva,
+
+Vou criar um arquivo docker-compose.yml para conseguir rodar o banco como container.
+
+services: // inicio da lista de serviço de containers que vao rodar juntos
+  db: // Nome do serviço do MySQL. Esse nome vira o “hostname” na rede do Docker. É por isso que no .env usa DB_HOST=db.
+    image: mysql:8.0 // versão do mysql
+    restart: unless-stopped // Se o container cair, ele reinicia sozinho.
+    environment: // Variáveis de ambiente do container do MySQL (configuram o banco quando inicia).
+      MYSQL_ROOT_PASSWORD: 12345 // Define a senha do usuário root do MySQL.
+      MYSQL_DATABASE: sys // Cria automaticamente a base sys na primeira inicialização.
+    ports:
+      - "3306:3306" // Mapeia a porta do MySQL para o seu Windows: esquerda = porta no seu PC (host) direita = porta dentro do container (MySQL)
+    volumes:
+      - mysql_data:/var/lib/mysql // Cria um volume persistente (dados não somem quando recriar o container). Tudo que o MySQL grava fica em /var/lib/mysql.
+    command: --default-authentication-plugin=mysql_native_password // Força o MySQL a usar o plugin de autenticação compatível com drivers antigos.
+    healthcheck: // Define um “teste de saúde” para o Docker saber quando o MySQL está pronto.
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p12345"] // Comando que o Docker roda dentro do container pra ver se o MySQL responde.
+      interval: 5s // faz o teste a cada 5s
+      timeout: 3s // se demorar mais de 3s considera falha e da timeout
+      retries: 20 // faz 20 tentativas
+
+  api: // Nome do serviço da sua aplicação Node/Express.
+    build: . // Diz para construir a imagem usando o Dockerfile da pasta atual.
+    restart: unless-stopped // Reinicia automaticamente se cair.
+    ports: // Mapeia porta da API: Você acessa no Windows: localhost:3005 A API dentro do container escuta: 3004 (o seu PORT do Node)
+      - "3005:3004"
+    env_file: // Faz o Docker ler seu arquivo .env e injetar as variáveis dentro do container.
+      - .env
+    depends_on: // Diz que o container api só deve iniciar depois que o db estiver “saudável” (healthcheck OK).
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
+
+
+  Alterado no dontenv o DB_HOST=127.0.0.1 para DB_HOST=DB
+
+  exclui o container e rodei novamente:
+
+  docker build -t myfirstapp .
+
+  Após
+  docker compose up --build
+
+  Agora terá dois conteiners, sendo eles:
+
+  dentro de TCC, já que é nome da pasta o DB e o API.
+
+Como funciona a comunicação com o MySQL (dentro do Docker)
+1) Cada serviço é um container, mas eles ficam na mesma rede
+
+No Compose, você tem:
+
+serviço api
+
+serviço db
+
+O Docker Compose cria automaticamente uma rede interna (tipo seuProjeto_default) e coloca os dois containers nela.
+
+2) O nome do serviço vira “DNS”
+
+Dentro dessa rede, o Docker cria um DNS interno:
+
+db → IP do container do MySQL
+
+api → IP do container da sua API
+
+Por isso, quando você coloca no .env:
+
+DB_HOST=db
+DB_PORT=3306
+
+
+A sua API não precisa saber IP nenhum. Ela só diz:
+“quero conectar no host db na porta 3306”.
+
+E o Docker resolve db para o IP certo.
+
+Isso é o ponto chave: 127.0.0.1 dentro do container apontaria para o próprio container, não para o MySQL.
+
+VAMO BUILDAR para subir pra net essa nossa aplicação.
+
+-- Ferramenta Cloud Build - google.
+
+Ele fica monitorando o código e repositórios para ver se houve alterações.
+Se houver alterações, em alguma branch determinada, ele roda um script para gerar a build.
+
+-- Container Registry
+
+Container Registry, local onde posso guardar as imagens dos conteiner criados de forma segura.
+Podendo manter versões completa das aplicações.
+
+-- Cloud RUN
+
+permite pegar a aplicação em docker e subir em servless.
+
+Criando um TRIGGER no Google Build inicia-se no minuto 42:02 da aula 1 parte 2 do projeto em desenvolvimento.
+
+Cria-se um arquivo chamado cloudbuild.yaml e definie-se alguns pontos.
+
+Aquivo criado:
+# cloudbuild.yaml
+# Este arquivo define o pipeline do Google Cloud Build (o que rodar e em que ordem).
+
+steps:  # Lista de etapas (steps) que o Cloud Build vai executar, em sequência.
+
+  # -------------------------------
+  # 1) BUILD: constrói a imagem Docker
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/docker'  # Usa a imagem oficial do builder "docker" (para rodar comandos docker).
+    args:  # Argumentos passados para o comando "docker" dentro desse builder.
+      [
+        'build',  # docker build -> constrói uma imagem a partir do Dockerfile.
+        '-t',     # -t -> define a tag (nome) da imagem que será criada.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA', # Nome final da imagem no Container Registry; $PROJECT_ID e $SHORT_SHA são variáveis do build.
+        '.'       # Contexto do build (pasta atual). É daqui que o Docker pega o Dockerfile e o código.
+      ]
+
+  # -------------------------------
+  # 2) PUSH: envia a imagem para o registry (Container Registry / Artifact Registry)
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/docker'  # Continua usando o builder do docker.
+    args:
+      [
+        'push',   # docker push -> faz upload da imagem para o registry.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA' # Deve ser a mesma tag criada no step de build.
+      ]
+      # OBS: no push NÃO vai '.' (ponto). Push só precisa do nome/tag da imagem.
+
+  # -------------------------------
+  # 3) DEPLOY: publica a imagem no Cloud Run
+  # -------------------------------
+  - name: 'gcr.io/cloud-builders/gcloud'  # Usa o builder do gcloud (para rodar comandos do Google Cloud).
+    entrypoint: 'gcloud'                 # Define que o comando principal a ser executado é "gcloud".
+    args:
+      [
+        'run',                 # gcloud run -> comando para gerenciar Cloud Run.
+        'deploy',              # deploy -> cria/atualiza o serviço no Cloud Run.
+        'puc-fullstack',       # Nome do serviço no Cloud Run (vai aparecer assim no console).
+        '--image',             # --image -> qual imagem do container o Cloud Run vai executar.
+        'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA', # A imagem que você buildou e pushou nos steps anteriores.
+        '--region',            # --region -> região onde o serviço Cloud Run será implantado.
+        'us-central1',         # Região escolhida.
+        '--platform',          # --platform -> tipo de plataforma do Cloud Run.
+        'managed',             # managed -> Cloud Run totalmente gerenciado (o padrão).
+        '--allow-unauthenticated' # Permite acesso público sem autenticação (cuidado em produção).
+      ]
+
+# (Opcional, mas recomendado) Lista explícita do que será considerado "artefato" do build.
+# Aqui, estamos dizendo ao Cloud Build para registrar a imagem gerada.
+images:
+  - 'gcr.io/$PROJECT_ID/puc-fullstack:$SHORT_SHA'  # Informa que essa imagem é um output do build.
+
+depois é criada uma parte para fazer um Push e após um Run.
+no exemplo do run, no ultimo argumento, foi usado sem autenticaçao, mas precisa passar a autenticação.
+Professor não passou como segue com autenticação.
+
+Após  ter configurado todos os passos para o deploy.
+
+Commit na main do arquivo
+
+Precisa vincular a tua conta no google cloud e vincular o teu git com o google cloud para fazer tudo funcionar.
+A partir da linha 272 é explicado como.
+Lógicamente é pago, mas é a fim de demonstração.
+
+Como foi feita o vinculo do git no google cloud, ao subir o arquivo, ele identifica e cria a build e já monta tudo automático.
+
+
+Passando para parte 3 da aula 1
+
+Relembrando
+
+Cloud build - é onde executamos essas ações de cima, para fazer o container e a imagem
+para depois enviar para container registry e após rodar no cloud run.
+
+O Registry vai gravar e guardar os containers, para que possa fazer roolback se necessário.
+
+Run executa a aplicação, precisa configurar a máquina e passar as váriaveis de ambiente.
+
+
+No minuto 03:04 o professor demonstra como faz a config build
+No google Build, cria-se um gatilho.
+Define um nome para ele, vincula o repositório do git
+nome da ramificação
+
+nome do arquivo do cloudbuild para identificar automaticamente.
+
+Feito as definições do novo gatilho, tendo o arquivo .yaml configurado, ao commitar e fazer o push no git
+o gatilho será executado e o google build faz a operação de build da imagem.
+Nessa config, já cria uma imagem no container registry e cria também um novo serviço no cloud run também.
+
+Trabalhar com branchs e esse formato de arquivo .yaml, com tudo vinculado bonitinho, facilita para teste de aplicação.
+OBS: que é falado em Concorrência, mas é bom frisar aqui. LEMBRAR DA PORTA.
+
+Exemplo, quero testar uma nova funcionalidade, basta criar uma nova branch, ajustar um novo gatilho, fazer as
+modificações no arquivo .ymal para subir nesse novo ambiente e esta feito o novo ambiente.
+
+Sempre que alguém fazer o commit e o push, vai ir para esse ambiente criado, gerando uma nova imagem no registry.
+
+OBS: para o novo ambiente no RUN, precisa adicionar as váriaveis de ambiente configuradas na aplicação.
+
+-- DEV e PROD (PARIDADE):
+
+Tentar sempre manter os ambientes o mais parecidos possível.
+
+o ideal é ter menos burocracia na equipe, para que o deploy seja o mais rápido possível.
+
+Não pode ter um ambiente de teste que tenha um banco diferente do de produção.
+Ou uma versão do node diferente ou quaisquer outra. A não ser que a implementação nova, seja uma atualização de algo.
+Ai o ambiente de desenvolvimento vai conter versões mais novas que no próximo deploy, será passada para prod.
+
+IDEAL de projeto.
+
+Deploy tem que ser em minutos para fazer os testes e para migrar para prod.
+
+Os deploys tem que ser feito pelo mesmo time, de preferencia pela mesma pessoa que desenvolveu.
+
+Ambientes tem que ser similares, versões e afins.
+
+-- Concorrência
+
+Porta pode ser um problema, sempre lembrar de definir portas diferentes para os servidores do mesmo ambiente.
+Exemplo: 2 servidores para produção, não podem ter a mesma porta 3001 e 3001 se estiverem no mesmo IP, precisa ser diferente,
+caso contrário pode dar algum problema, o mais normal é o segundo não subir.
+Se for no mesmo IP, ai pode ter a mesma porta.
+
+Visando em aplicação WEB e ter dois ambientes, é meio burro manter ambos no mesmo server, por compartilharão os mesmos recursos.
+
+A ideia é usar 2 servs diferentes, para que cada um tenha seus recursos.
+
+Tendo dois server configurados, pode ser usar um load balancer para fazer o balanceamento da carga.
+
+Os usuário conectam no load balancer e ele faz o processo de distribuir a carga entre os servers conforme a config.
+
+Load Balancers não precisam ser exclusivo entre servers de aplicação, podem ser para banco ou demais aplicações.
+
+-- LOGs
+
+Logs é essencial para entender o que esta ocorrendo com nossa aplicação
+
+Existe a possibilidade de juntar todos os logs, ferramentas para isso:
+
+papertrail | datadog | KIBANA | Sentry
+
+-- REGRAS
+
+1 - Realizar testes unitários
+  fazer teste de cada funcionalidade e cada passo, para que o escalonamento seja mais fácil.
+
+2 - Integrar o código continuamente
+  Fazer o commit e push no git, ideal que não demore o merge entre uma Branch de teste e a main.
+  A chance de dar cagada, a quanto mais o tempo passar é cada vez mais alta.
+
+3 - Serviços de CI
+  Usar ferramentas que auxiliam e facilitem a build, para que seja o mais rápido possível.
+
+4 - Deploy automático
+
+-- CUSTO
+
+Usar ferramentas em cloud pode gerar um custo (Podendo ser muito alto dependendo da escala)
+
+Mas pode ser mais barato que um server e manter as melhores práticas, lógico, não existe almoço grátis, cobra seu preço.
+
+-- AULA 1 PARTE 4
+
+-- Testes Automatizados
+
+Ferramenta Cypress
+
+Ela cria testes para app web, como se fosse uma pessoa, para identificar bugs e validar.
+Começa no minuto 02:040
+Para criar o cypress:
+
+Comando npm install cypress -d 
+
+-d = definir que essa dependência va como desenvolvimento
+para evitar que envie como prod posteriormente.
+
+Comando para abrir o CYPRESS:
+
+npx cypress open
+
+Vai abrir uma tela para ver as possibilidades de configurações e selecionará como fara isso:
+na demonstração foi selecionada a ferramenta Chrome.
+
+-- COMO escrever testes para o cypress
+
+Ao instalar o cypress, irá criar uma pasta na chamada CYPRESS, nela haverá a subpasta E2E (End Two End)
+
+Criaremos uma nova pasta e dentro dela um novo arquivo.
+
+Esse arquivo deve acabar com .cy.js, que é a extensão do cypress + java script
+
+
+-- segurança
+
+- Limitar acesso a API
+  Biblioteca node express-rate-limit
+
+  Ela limita o IP a fazer o acesso a cada x tempo.
+
+  para intalar ela é npm install express-rate-limit
+
+--- UTIL - O COMANDO ABAIXO SERVE PARA:
+
+Entre no container da API, caso queira adicionar alguma biblioteca nele diretamente:
+
+docker compose exec api sh - acessa 
+
+npm install express-rate-limit - Instala Ela
+
+exit - sai do container.
+
+- Limpar inputs vindo de POST, GET e parâmetros nas URLS na api.
+  Biblioteca xxs-clean
+
+para intalar ela é npm install xss-clean
+
+- Limpa os cabeçalhos HTTP para evitar ataques
+  Biblioteca helmet
+
+para instalar npm install helmet
+
+-- BOAS PRATICAS
+
+  usar WAF - WEB APPLICATION FIREWALL
+  Nada mais é que um firewall web, que ajuda a proteger os apps ao filtrar e/ou monitorar o trafego HTTP.
+
+  Protege de ataques de falsificação entre sites, injeção SQL, inclusão de arquivos, etc
+
+  Evita DDOS.
+
+- Melhores práticas de aplicação.
+
+1- manter todas depêndencias atualizadas.
+2- Usar middleware e frameworks que forneçam medidas de segurança integrada (Helmet, Express).
+3- Tratar parâmetros de forma adequada, tratamento de erros e afins.
+4- Usar protocolo seguros como HTTPS, para criptografar dados confidenciais.
+5- Usar ferramentas e serviços de segurança, como scanners de vulnerabilidade, para achar pontos fracos e afins. SNYK.io
+6- implementar registros e monitormaneto de segurança para rastrear e investigar eventos de segurança (LOGS).
+7- limitar acesso a informações e finções confidenciais implementando controle de acesso baseado em função e atutenticação.
+8- Evitar usar pacotes de terceiros e inseguros.
+9- Use criptografia para proteger dados confidenciais.
+10- Realizar regularmente auditorias de segurança e testes de penetração para ver se há vulnerabilidade.
+
+- OWASP
+
+Organização que investiga os erros que mais acontecem ultimamente.
+
+  
