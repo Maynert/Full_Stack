@@ -4,11 +4,12 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 12345
-      MYSQL_DATABASE: sys
+      MYSQL_DATABASE: tcc
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p12345"]

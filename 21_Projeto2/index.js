@@ -2,7 +2,7 @@ require('dotenv').config() // carreguei a porta do dotenv
 
 // Segurança
 const rateLimit = require('express-rate-limit')
-const xss = require('xss-clean')
+// const xss = require('xss-clean')
 const helmet = require('helmet')
 
 // Demais bibliotecas
@@ -22,15 +22,32 @@ const mysqlConfig = {
 
 const limiter = rateLimit({
     windowMs: 60 * 60 * 1000, // tempo que a pessoa  pode acessar a api
-    max: 1, // quantidade de acessos dentro desse tempo
+    max: 100, // quantidade de acessos dentro desse tempo
     message: "You are tongo",
 })
 
 app.use(limiter) // quando quero limitar para todos endpoints.
-app.use(xss()) // aplico para todas fazerem a limpeza de input de códigos em POST, GET e url.
+// app.use(xss()) // aplico para todas fazerem a limpeza de input de códigos em POST, GET e url.
 app.use(helmet()) // aplico para limpar os cabeçalhos HTTP para evitar ataques
 
 const connection = mysql.createConnection(mysqlConfig); // criando a conexão e passando o mysqlconfig definido e do dotenv para buscar as config.
+
+connection.on('error', (err) => {
+  console.error('MySQL connection error:', err.code, err.message)
+})
+
+connection.connect((err) => {
+  if (err) {
+    console.error('Erro ao conectar no MySQL:', err.code, err.message)
+    // Aqui você escolhe o comportamento:
+    // a) NÃO derrubar a API (deixa no ar, mas /data vai falhar)
+    return
+
+    // b) OU derrubar e deixar o Docker reiniciar:
+    // process.exit(1)
+  }
+  console.log('MySQL conectado!')
+})
 
 //  app.get == endpoint
 app.get('/data', (req, res) => { // quando acessado /data, fará uma query no banco
@@ -52,7 +69,7 @@ app.get('/', (req, res) => {
 })
 // quando quer em apenas um endpoint o bloqueio: app.get('/welcome', limiter, (req, res) => {
 app.get('/welcome', (req, res) => {
-    res.send("WEEEEELCOMMMMEEEEE")
+    res.send("Welcome")
 })
 
 app.get('/cool', (req, res) => {
