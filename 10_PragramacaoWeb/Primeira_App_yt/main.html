@@ -1,0 +1,21 @@
+<!DOCTYPE html>  <!-- definição que é HTML -->
+<html lang="pt"> <!-- Abre o HTML e define linguagem -->
+    <head> <!-- cabeçalho -->
+        <meta charset="UTF-8"/> <!--  seta a tipo da linguagem -->
+        <meta name="viewport"  content="whidth=device-whidt, initial-scale=1.0" />
+        <!--  Quer dizer que a largura da página, vai ser igual ao que ta abrindo. -->
+        <tile>Lista de Tarefas</tile>
+        <link rel="stylesheet" href="main.css" /> <!-- guia de estilos, seto meu arquivo .css -->
+        <script src="main.js"></script>
+    </head> 
+    <body>
+        <div> <!-- bloco de conteúdos -->
+            <h1 class="title">Tarefas do dia</h1> <!-- Titulo -->
+            <ul id="list"></ul>
+        </div>
+        <div>
+            <input type="text" id="task_name" name="task_name" placeholder="nome_da_tarefa"/>
+            <button onclick="addNewTask()">Adicionar</button>
+        </div>
+    </body>
+</html>  <!-- Fecha HTML -->

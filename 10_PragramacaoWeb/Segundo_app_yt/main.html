@@ -1,0 +1,28 @@
+<!DOCTYPE html>  <!-- definição que é HTML -->
+<html lang="pt"> <!-- Abre o HTML e define linguagem -->
+    <head> <!-- cabeçalho -->
+        <meta charset="UTF-8"/> <!--  seta a tipo da linguagem -->
+        <meta name="viewport"  content="width=device-whidt, initial-scale=1.0" />
+        <script src="main.js"></script>
+        <!--  Quer dizer que a largura da página, vai ser igual ao que ta abrindo. -->
+        <title>Star Wars</title>
+        <link rel="stylesheet" href="main.css" /> <!-- guia de estilos, seto meu arquivo .css -->
+        
+    </head> 
+    <body>
+      <div class="main">
+         <div class="header">
+            <img class="logo" src="images/LogoEmpire.png" alt="starwars-logo"/>
+            <h1>StarWars</h1>
+        </div>
+        <div class="search-bar">
+            <input placeholder="Pesquisar..." class="search-input" id="search-input"/>
+            <button onclick="onSearch()" class="search-button"></button>
+        </div>
+        <div class="films-list" id="films-list"></div>
+        <div class="modal" id="modal" onclick="hideModal()">
+            <div class="modal-content" id="modal-content"></div>
+        </div>
+      </div>
+    </body>
+</html>  <!-- Fecha HTML -->
