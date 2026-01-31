@@ -5,7 +5,7 @@ Este repositório reúne evidências, artefatos e registros de aprendizagem prod
 ## Método de execução.
 
 1. Buildar no docker o container: docker compose up --build -d
-2. 
+2. Caso precise excluir os container: docker compose down -v 
 
 ### Comandos docker
 
