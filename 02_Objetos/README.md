@@ -22,4 +22,4 @@ Cada pasta representa uma aula e contém:
 - JSON, exceções, callbacks, promises e async/await
 
 ## 👩‍💻 Autoria
-Samira Antiqueira Mazotti
+Maynert Hazael Mazotti Traiber
