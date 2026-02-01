@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 const { randomUUID } = require('crypto');
-const { listAll, listOne, addPost, delPost} = require('../controller/postcards');
+const { listAll, listOne, addPost, delPost, addMongo, listAllMongo} = require('../controller/postcards');
 
 // app.use(express.json());
 
@@ -11,7 +11,8 @@ const { listAll, listOne, addPost, delPost} = require('../controller/postcards')
 
 // Rota GET para obter todos os Postcards
 router.get('/', (req, res) => {
-    listAll(res);
+    // listAll(res); sem mongo
+    listAllMongo(res);
 });
 
 router.get('/:id', (req, res) => {
@@ -20,7 +21,8 @@ router.get('/:id', (req, res) => {
 });
 
 router.post('/', (req, res) => {
-    addPost(req, res)
+    // add(req,res) // Sem mongo
+    addMongo(req, res)
 });
 
 router.delete('/:id', (req, res) => {

@@ -1,9 +1,15 @@
 const fs = require("fs");
 // const { postcardsPath } = require("../routes/postcards");
+const {MongoClient, ObjectId} = require('mongodb');
 const { randomUUID } = require('crypto');
+const { connect } = require("http2");
 
 const postcardsPath = './postcards.json';
 //exports.postcardsPath = postcardsPath;
+
+const url = 'mongodb://localhost:27017';
+const dbName = 'postcardsDB';
+const collectionName = 'postcards';
 
 function listAll(res) {
     fs.readFile(postcardsPath, 'utf8', (err, data) => {
@@ -98,7 +104,62 @@ function delPost(res, id) {
 
 };
 
+async function listAllMongo(res) {
+    const client = new MongoClient(url);
+
+    try{
+        await client.connect();
+        const db = client.db(dbName);
+        const collection = db.collection(collectionName);
+        const postcards = await collection.find().toArray();
+        res.status(201).json(postcards);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({error: 'Failed to add new postcard.'})
+    }
+    finally{
+        await client.close();
+    }
+};
+
+async function addMongo(req, res){
+
+    const { name, cidade, pais, descricao, imageUrl } = req.body;
+    //const imageUrl = `https://picsum.photos/400/300`; // Gerador automático de imagens
+
+    const newPostcard = {
+        id: randomUUID(),
+        name,
+        cidade,
+        pais,
+        descricao,
+        imageUrl,
+    };
+
+    const client = new MongoClient(url);
+
+    try{
+        await client.connect();
+        const db = client.db(dbName);
+        const collection = db.collection(collectionName);
+        const result = await collection.insertOne(newPostcard);
+        newPostcard._id = result.insertedId;
+        res.status(201).json(newPostcard);
+    }
+    catch (error) {
+        console.log(error);
+        res.status(500).json({error: 'Failed to add new postcard.'})
+    }
+    finally{
+        await client.close();
+    }
+  
+};
+
 exports.listAll = listAll;
 exports.listOne = listOne;
 exports.addPost = addPost;
 exports.delPost = delPost;
+exports.addMongo = addMongo;
+exports.listAllMongo = listAllMongo
