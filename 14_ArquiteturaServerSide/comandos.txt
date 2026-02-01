@@ -1,0 +1,20 @@
+npm innit - inicia e cria o package.json
+
+instalar express
+
+no package em Script o  "start": "node server2.js", serve para iniciar automaticamente quando rodar o npm start
+
+se instalar uma biblioteca com -s no final, ele adiciona como dependencia no package
+
+se instalar com -g ele transforma global, não adiciona no package mas ta instalado para uso na máquina.
+
+exemplo: npm install nodemon -g | Esse cara ficará global, se colocar -s ficara como dependencia, sempre levando junto ao fonte.
+
+Instalado o nodemon, para que possa salvar o arquivo e atualizar o server de forma automática, sem precisar reiniciar o server.
+
+precisa adicionar no package em "start": "nodemon server2.js" mudando node para nodemon
+
+Comando NPM start inicia o server.
+
+Se rodar no console Express-generator --no-view nome_da_pasta, ele vai cria essa pasta com todas uma estrutura de pastas
+Isso aparece no minuto 40:56 da parte 3 da aula 1
