@@ -1,0 +1,19 @@
+# Programação Orientada a Objetos com JavaScript
+
+Este repositório reúne exemplos práticos da disciplina **Programação para WEB**, no contexto do curso de **Desenvolvimento Full Stack (PUCRS)**.
+
+## 🎯 Objetivo
+- criar uma lista de tarefas.
+
+## 📁 Estrutura
+- Arquivos de execução da lista.
+
+## 🧠 Conteúdos (visão geral)
+- Gerar uma lista simples de tarefas.
+
+```bash
+node main.html
+```
+
+## 👩‍💻 Autoria
+Maynert Hazael Mazotti Traiber

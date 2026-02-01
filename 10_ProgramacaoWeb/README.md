@@ -1,8 +1,19 @@
-# Portfólio — Desenvolvimento Full Stack (PUCRS)
+# Programação Orientada a Objetos com JavaScript
 
-## 10_ProgramacaoWeb
+Este repositório reúne exemplos práticos da disciplina **Programação para WEB**, no contexto do curso de **Desenvolvimento Full Stack (PUCRS)**.
 
-### Índice por disciplina
-1. [Primeira_App_yt] Desenvolvido para realizar uma simples listagem de tarefas.
-2. [Segundo_App_yt] Desenvolvido para listar os filmes do star wars, essa listagem é consumida de uma API.
+## 🎯 Objetivo
+- Programação para a WEB
 
+## 📁 Estrutura
+- pastas separadas para cada projeto.
+- Arquivos para cada execução de cada projeto.
+- Um `README.md` explicando cada um.
+
+## 🧠 Conteúdos (visão geral)
+
+- [Primeira_App_yt] Desenvolvido para realizar uma simples listagem de tarefas.
+- [Segundo_App_yt] Desenvolvido para listar os filmes do star wars, essa listagem é consumida de uma API.
+
+## 👩‍💻 Autoria
+Maynert Hazael Mazotti Traiber
