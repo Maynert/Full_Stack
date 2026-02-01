@@ -1,1 +1,0 @@
-Arquivo de exemplo para leitura assíncrona (callback/Promise/async-await).\n
