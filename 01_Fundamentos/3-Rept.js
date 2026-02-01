@@ -22,9 +22,9 @@ for (var i = 0; i < 9; i++) {
     console.log(i);
     
     if(i === 8) 
-        console.log("Sou Lindo!!");
+        console.log("Desenvolvimento!!");
     else 
-        console.log("Ainda não.");
+        console.log("Full Stack");
 
 }
 
