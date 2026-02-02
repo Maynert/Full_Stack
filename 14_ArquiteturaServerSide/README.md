@@ -1,4 +1,3 @@
-
 Este repositório reúne exemplos práticos da disciplina **Arquitetura Server Side**, no contexto do curso de **Desenvolvimento Full Stack (PUCRS)**.
 
 ## 🎯 Objetivo
