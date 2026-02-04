@@ -7,7 +7,7 @@ Este repositório reúne exemplos práticos da disciplina **Programação para W
 
 ## 📁 Estrutura
 - pastas separadas para cada projeto.
-- Arquivos para cada execução de cada projeto.
+- Arquivos para execução de cada projeto.
 - Um `README.md` explicando cada um.
 
 ## 🧠 Conteúdos (visão geral)
