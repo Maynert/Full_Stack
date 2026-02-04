@@ -1,11 +1,12 @@
 node_modules
+/05_BancoNoSql
 /07_DesignThinking
-/08_Segurança
-/19_UI
-/20_UX
 /06_DevOpsAvancado
+/08_Segurança
 /11_InovETransDgt
 /12_ArquiteturaCloud
-/18_Qualidade
-/17_MentalidadeAgil
 /16_TecnologiasAgeis
+/17_MentalidadeAgil
+/18_Qualidade
+/19_UI
+/20_UX

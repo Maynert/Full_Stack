@@ -1,5 +1,3 @@
-# Programação Orientada a Objetos com JavaScript
-
 Este repositório reúne exemplos práticos da disciplina **Fundamentos de computação e algoritmos**, no contexto do curso de **Desenvolvimento Full Stack (PUCRS)**.
 
 ## 🎯 Objetivo
